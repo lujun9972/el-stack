@@ -2,11 +2,11 @@
 (require 'eieio)
 (require 'stack)
 
-(defclass stack-vector ()
+(defclass stack-vector (stack)
   ((content :initform (vector) :initarg :content :protection :protected)
    (top :initform -1)))
 
-(defmethod stack-vector-create (capacity)
+(defun stack-vector-create (capacity)
   "Create a stack"
   (make-instance 'stack-vector :content (make-vector capacity nil)))
 
@@ -15,7 +15,9 @@
 
 (defmethod stack-clear ((stack-object stack-vector))
   (dotimes (n (stack-length stack-object))
-    (setf (aref stack-object n) nil)))
+    (setf (aref (stack-content stack-object) n) nil))
+  (setf (oref stack-object top) -1)
+  stack-object)
 
 (defmethod stack-empty-p ((stack-object stack-vector))
   (= 0 (stack-length stack-object)))
@@ -38,7 +40,7 @@
 
 (defmethod stack-full-p ((stack-object stack-vector))
   "Wether the stack is full"
-  (= (oref stack-object top) (- (length (stack-content stack-object)) -1)))
+  (= (oref stack-object top) (- (length (stack-content stack-object)) 1)))
 
 (defmethod stack-push ((stack-object stack-vector) element)
   (when (stack-full-p stack-object)
@@ -50,11 +52,15 @@
 
 (defmethod stack-resize ((stack-object stack-vector) &optional new-capacity)
   "resize the stack"
-  (let* ((old-capacity (length (stack-content stack)))
+  (let* ((old-capacity (length (stack-content stack-object)))
          (new-capacity (or new-capacity
                            (* 2 old-capacity)))
          (new-content (make-vector new-capacity nil)))
     (dotimes (n (stack-length stack-object))
       (setf (aref new-capacity n)
             (aref (stack-content stack-object) n)))
+    (setf (stack-content stack-object)
+          new-content)
     stack-object))
+
+(provide 'stack-vector)
