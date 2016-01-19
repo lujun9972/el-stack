@@ -85,4 +85,20 @@
                element)))
   )
 
+(defmethod stack-resize ((stack-object stack-share-vector) &optional new-capacity)
+  "resize the stack"
+  (let* ((old-capacity (stack-capacity stack-object))
+         (new-capacity (or new-capacity
+                           (* 2 old-capacity)))
+         (new-content (make-vector new-capacity nil)))
+    (dotimes (n (nth 0 (stack-length stack-object)))
+      (setf (aref new-content n)
+            (aref (stack-content stack-object) n)))
+    (dotimes (n (nth 1 (stack-length stack-object)))
+      (setf (aref new-content (- new-capacity n)
+                  (aref (stack-content stack-object) (- old-capacity n)))))
+      (setf (stack-content stack-object)
+            new-content)
+      stack-object))
+
 (provide 'stack-share-vector)
