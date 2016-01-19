@@ -13,6 +13,9 @@
 (defmethod stack-length ((stack-object stack-vector))
   (+ 1 (oref stack-object top)))
 
+(defmethod stack-capacity ((stack-object stack-vector))
+  (length (stack-content stack-object)))
+
 (defmethod stack-clear ((stack-object stack-vector))
   (dotimes (n (stack-length stack-object))
     (setf (aref (stack-content stack-object) n) nil))
@@ -40,7 +43,7 @@
 
 (defmethod stack-full-p ((stack-object stack-vector))
   "Wether the stack is full"
-  (= (oref stack-object top) (- (length (stack-content stack-object)) 1)))
+  (= (oref stack-object top) (- (stack-capacity stack-object) 1)))
 
 (defmethod stack-push ((stack-object stack-vector) element)
   (when (stack-full-p stack-object)
@@ -52,7 +55,7 @@
 
 (defmethod stack-resize ((stack-object stack-vector) &optional new-capacity)
   "resize the stack"
-  (let* ((old-capacity (length (stack-content stack-object)))
+  (let* ((old-capacity (stack-capacity stack-object))
          (new-capacity (or new-capacity
                            (* 2 old-capacity)))
          (new-content (make-vector new-capacity nil)))
